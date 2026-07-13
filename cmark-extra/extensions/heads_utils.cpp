@@ -8,7 +8,11 @@
 #include "heads_utils.hpp"
 // #include "string_utils.hpp"
 
+#if defined(_WIN32) || !defined(__APPLE__)
+#define REGEX_LIBRARY 1
+#else
 #define PCRE2_LIBRARY 1
+#endif
 
 #include <string>
 #include <codecvt>

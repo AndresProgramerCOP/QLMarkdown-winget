@@ -21,14 +21,39 @@
 #include <errno.h>
 
 #include "b64.h"
+#if defined(__APPLE__)
 #include <os/log.h>
+#endif
 
 #include "c_log.h"
 
 // #include <curl/curl.h>
-#include <libgen.h>
 #include <ctype.h>
+
+#ifndef WITHOUT_CURL
 #include <curl/curl.h>
+#else
+static char *curl_easy_unescape(void *curl, const char *url, int inlength, int *outlength) {
+    size_t len = strlen(url);
+    char *res = malloc(len + 1);
+    size_t j = 0;
+    for (size_t i = 0; i < len; ++i) {
+        if (url[i] == '%' && i + 2 < len) {
+            char hex[3] = { url[i+1], url[i+2], 0 };
+            res[j++] = (char)strtol(hex, NULL, 16);
+            i += 2;
+        } else if (url[i] == '+') {
+            res[j++] = ' ';
+        } else {
+            res[j++] = url[i];
+        }
+    }
+    res[j] = '\0';
+    if (outlength) *outlength = (int)j;
+    return res;
+}
+#define curl_free(ptr) free(ptr)
+#endif
 
 static inline void lowercase(char *s){
     while (*s) {
