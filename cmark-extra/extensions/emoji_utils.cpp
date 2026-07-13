@@ -18,9 +18,14 @@
 #include <sstream>
 #include <vector>
 
+#if defined(__APPLE__)
 #include <os/log.h>
-
 extern "C" os_log_t getLogForEmojiExt(void);
+#else
+typedef void* os_log_t;
+#define os_log_error(log, format, ...) (void)0
+static os_log_t getLogForEmojiExt(void) { return nullptr; }
+#endif
 
 // https://api.github.com/emojis
 
